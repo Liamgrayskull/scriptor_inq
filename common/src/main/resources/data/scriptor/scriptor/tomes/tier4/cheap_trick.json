@@ -1,8 +1,7 @@
 {
-  "name": "tome.scriptor.cheap_trick",
+  "name": "A Cheap Trick",
   "author": "Niz",
   "tier": 4,
-  "item": "scriptor:spellbook_red",
   "spell": {
     "subject": "touch",
     "spells": [

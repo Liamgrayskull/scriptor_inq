@@ -1,64 +1,49 @@
 package com.ssblur.scriptor.events.reloadlisteners;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.ssblur.scriptor.ScriptorMod;
 import com.ssblur.scriptor.exceptions.InvalidGeneratorException;
 import com.ssblur.scriptor.exceptions.MissingRequiredElementException;
+import com.ssblur.scriptor.helpers.resource.TomeResource;
 import com.ssblur.scriptor.registry.TokenGeneratorRegistry;
-import com.ssblur.scriptor.tabs.ScriptorTabs;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 
+import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Random;
 
-public class GeneratorReloadListener extends ScriptorReloadListener {
+public class GeneratorReloadListener extends SimpleJsonResourceReloadListener {
+  static ResourceLocation GENERATORS = new ResourceLocation("data/scriptor/generators");
+  static Gson GSON = new Gson();
   public static final GeneratorReloadListener INSTANCE = new GeneratorReloadListener();
   GeneratorReloadListener() {
-    super("scriptor/generators");
+    super(GSON, "scriptor/generators");
   }
 
   @Override
   protected void apply(Map<ResourceLocation, JsonElement> objects, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-    ScriptorMod.COMMUNITY_MODE = false;
-    super.apply(objects, resourceManager, profilerFiller);
-  }
+    objects.forEach((resourceLocation, jsonElement) -> {
+      var object = jsonElement.getAsJsonObject();
+      if(!object.has("generator"))
+        throw new MissingRequiredElementException("generator", resourceLocation);
+      if(!object.has("parameters"))
+        throw new MissingRequiredElementException("parameters", resourceLocation);
 
-  @Override
-  public void loadResource(ResourceLocation resourceLocation, JsonElement jsonElement) {
-    var object = jsonElement.getAsJsonObject();
-    if(!object.has("generator"))
-      throw new MissingRequiredElementException("generator", resourceLocation);
-    if(!object.has("parameters"))
-      throw new MissingRequiredElementException("parameters", resourceLocation);
+      var generator = object.get("generator").getAsString();
+      if(TokenGeneratorRegistry.INSTANCE.getGeneratorGenerator(generator) == null)
+        throw new InvalidGeneratorException(generator, resourceLocation);
 
-    var generator = object.get("generator").getAsString();
-    if(TokenGeneratorRegistry.INSTANCE.getGeneratorGenerator(generator) == null)
-      throw new InvalidGeneratorException(generator, resourceLocation);
+      var generatorGenerator = TokenGeneratorRegistry.INSTANCE.getGeneratorGenerator(generator);
+      TokenGeneratorRegistry.INSTANCE.registerGenerator(resourceLocation, generatorGenerator.create(object.get("parameters").getAsJsonObject()));
 
-    if(generator.equals("community")) {
-      ScriptorMod.LOGGER.info("Community mode generator loaded, locking down debug features.");
-      ScriptorMod.COMMUNITY_MODE = true;
-
-      var tab = ScriptorTabs.SCRIPTOR_TAB.get();
-    }
-
-    var generatorGenerator = TokenGeneratorRegistry.INSTANCE.getGeneratorGenerator(generator);
-    TokenGeneratorRegistry.INSTANCE.registerGenerator(resourceLocation, generatorGenerator.create(object.get("parameters").getAsJsonObject()));
-
-    if(object.has("default") && object.get("default").getAsBoolean())
-      if(
-        TokenGeneratorRegistry.INSTANCE.getDefaultGenerator() == null
-          || TokenGeneratorRegistry.INSTANCE.getDefaultGenerator().getNamespace().equals("scriptor")
-          || !resourceLocation.getNamespace().equals("scriptor")
-      )
+      if(object.has("default") && object.get("default").getAsBoolean())
         TokenGeneratorRegistry.INSTANCE.registerDefaultGenerator(resourceLocation);
-      else
-        ScriptorMod.LOGGER.warn(
-          "Skipping registration of default generator at {}; A default generator outside the 'scriptor' namespace was already registered.",
-          resourceLocation
-        );
-
-    ScriptorMod.LOGGER.info("Loaded custom generator at {}", resourceLocation);
+      ScriptorMod.LOGGER.info("Loaded custom generator at {}", resourceLocation);
+    });
   }
 }

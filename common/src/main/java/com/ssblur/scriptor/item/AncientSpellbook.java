@@ -1,8 +1,8 @@
 package com.ssblur.scriptor.item;
 
 import com.ssblur.scriptor.advancement.ScriptorAdvancements;
-import com.ssblur.scriptor.data.DictionarySavedData;
 import com.ssblur.scriptor.events.reloadlisteners.TomeReloadListener;
+import com.ssblur.scriptor.data.DictionarySavedData;
 import com.ssblur.scriptor.helpers.LimitedBookSerializer;
 import com.ssblur.scriptor.word.Spell;
 import net.minecraft.network.chat.Component;
@@ -47,12 +47,12 @@ public class AncientSpellbook extends Item {
       var resource = TomeReloadListener.INSTANCE.getRandomTome(tier, player);
 
       if(resource.getSpell().spells().length > 1)
-        ScriptorAdvancements.COMPLEX_SPELL.get().trigger((ServerPlayer) player);
+        ScriptorAdvancements.COMPLEX_SPELL.trigger((ServerPlayer) player);
 
       Spell spell = resource.getSpell();
       String sentence = DictionarySavedData.computeIfAbsent(server).generate(spell);
 
-      var spellbook = LimitedBookSerializer.createSpellbook(resource.getAuthor(), resource.getName(), sentence, resource.getItem());
+      var spellbook = LimitedBookSerializer.createSpellbook(resource.getAuthor(), resource.getName(), sentence);
       if(!player.addItem(spellbook)) {
         ItemEntity entity = new ItemEntity(
           level,
@@ -63,7 +63,7 @@ public class AncientSpellbook extends Item {
         );
         level.addFreshEntity(entity);
       }
-      player.sendSystemMessage(Component.translatable("extra.scriptor.spell_get", Component.translatable(resource.getName())));
+      player.sendSystemMessage(Component.translatable("extra.scriptor.spell_get", resource.getName()));
       player.getItemInHand(interactionHand).shrink(1);
       return InteractionResultHolder.consume(player.getItemInHand(interactionHand));
     }

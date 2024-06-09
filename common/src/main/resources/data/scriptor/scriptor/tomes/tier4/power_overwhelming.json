@@ -1,7 +1,6 @@
 {
-  "name": "tome.scriptor.power_overwhelming",
+  "name": "Touch of Death",
   "author": "Squiddles",
-  "item": "scriptor:spellbook_black",
   "tier": 4,
   "spell": {
     "subject": "touch",

@@ -1,20 +1,21 @@
 package com.ssblur.scriptor.word.subject;
 
-import com.ssblur.scriptor.api.word.Subject;
 import com.ssblur.scriptor.helpers.targetable.EntityTargetable;
 import com.ssblur.scriptor.helpers.targetable.Targetable;
 import com.ssblur.scriptor.word.Spell;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-public class StormSubject extends Subject {
+public class StormSubject extends Subject{
 
   @Override
   public Cost cost() { return new Cost(8, COSTTYPE.MULTIPLICATIVE); }

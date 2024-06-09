@@ -1,16 +1,14 @@
 package com.ssblur.scriptor.events;
 
 import com.ssblur.scriptor.damage.ScriptorDamage;
-import com.ssblur.scriptor.data.DictionarySavedData;
 import com.ssblur.scriptor.effect.ScriptorEffects;
-import com.ssblur.scriptor.gamerules.ChatRules;
-import com.ssblur.scriptor.gamerules.ScriptorGameRules;
+import com.ssblur.scriptor.helpers.ConfigHelper;
+import com.ssblur.scriptor.data.DictionarySavedData;
 import com.ssblur.scriptor.helpers.targetable.EntityTargetable;
 import com.ssblur.scriptor.word.Spell;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.ChatEvent;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -38,50 +36,23 @@ public class SpellChatEvents implements ChatEvent.Received {
 
           int cost = (int) Math.round(spell.cost() * 30);
 
-          if (level.getGameRules().getInt(ScriptorGameRules.VOCAL_MAX_COST) >= 0 && cost > level.getGameRules().getInt(ScriptorGameRules.VOCAL_MAX_COST))
+          var config = ConfigHelper.getConfig();
+          if (config.vocalCastingMaxCost >= 0 && cost > config.vocalCastingMaxCost)
             player.sendSystemMessage(Component.translatable("extra.scriptor.mute"));
-		
-		  int adjustedCost = (int) Math.round( (double)cost * ( (double) level.getGameRules().getInt(ScriptorGameRules.VOCAL_COOLDOWN_MULTIPLIER) / (double) 100 ) );
-		  if (!player.isCreative()) {
-			  player.addEffect(new MobEffectInstance(ScriptorEffects.HOARSE.get(), adjustedCost));
-			  if (adjustedCost > level.getGameRules().getInt(ScriptorGameRules.VOCAL_HUNGER_THRESHOLD))
-				  player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 2*(adjustedCost - level.getGameRules().getInt(ScriptorGameRules.VOCAL_HUNGER_THRESHOLD))));
-			  if (adjustedCost > level.getGameRules().getInt(ScriptorGameRules.VOCAL_DAMAGE_THRESHOLD))
-				  player.hurt(Objects.requireNonNull(ScriptorDamage.overload(player)), (adjustedCost - level.getGameRules().getInt(ScriptorGameRules.VOCAL_DAMAGE_THRESHOLD) * 0.75f) / 100f);
-		  }
-        if(player.getHealth() > 0)
-          spell.cast(new EntityTargetable(player));
 
-        if(!server.getGameRules().getBoolean(ChatRules.SHOW_SPELLS_IN_CHAT))
+          player.addEffect(new MobEffectInstance(ScriptorEffects.HOARSE.get(), cost));
+          if (cost > config.vocalCastingHungerThreshold)
+            player.addEffect(new MobEffectInstance(MobEffects.HUNGER, config.vocalCastingHungerThreshold));
+          if (cost > config.vocalCastingHurtThreshold)
+            player.hurt(Objects.requireNonNull(ScriptorDamage.overload(player)), (cost - config.vocalCastingHurtThreshold * 0.75f) / 100f);
+
+          if(player.getHealth() > 0)
+            spell.cast(new EntityTargetable(player));
+
           return EventResult.interruptFalse();
         }
       }
-
-      if (level instanceof ServerLevel server && server.getGameRules().getBoolean(ChatRules.PROXIMITY_CHAT)) {
-        int distance = server.getGameRules().getInt(ChatRules.PROXIMITY_RANGE);
-        var name = player.getDisplayName();
-        Component message;
-        if(name == null)
-          message = Component.literal("> ").append(component);
-        else
-          message = Component.literal("<")
-            .append(name)
-            .append(Component.literal("> "))
-            .append(component);
-
-        var players = server.getPlayers(recipient -> recipient.distanceTo(player) <= distance);
-        for(var recipient: players)
-          recipient.sendSystemMessage(message);
-
-        if(players.size() <= 1)
-          player.sendSystemMessage(Component.translatable("command.scriptor.unheard")
-            .withStyle(ChatFormatting.GRAY)
-            .withStyle(ChatFormatting.ITALIC));
-
-        return EventResult.interruptFalse();
-      }
     }
-
     return EventResult.pass();
   }
 }

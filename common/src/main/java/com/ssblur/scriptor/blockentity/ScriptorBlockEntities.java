@@ -1,6 +1,8 @@
 package com.ssblur.scriptor.blockentity;
 
 import com.ssblur.scriptor.ScriptorMod;
+import com.ssblur.scriptor.block.CastingLecternBlock;
+import com.ssblur.scriptor.block.RuneBlock;
 import com.ssblur.scriptor.block.ScriptorBlocks;
 import com.ssblur.scriptor.blockentity.renderers.CastingLecternBlockEntityRenderer;
 import com.ssblur.scriptor.blockentity.renderers.ChalkBlockEntityRenderer;
@@ -11,6 +13,7 @@ import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.fabricmc.api.EnvType;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
@@ -41,7 +44,7 @@ public class ScriptorBlockEntities {
   public static void register() {
     BLOCK_ENTITIES.register();
 
-    if(!Platform.isForgeLike() && Platform.getEnv() == EnvType.CLIENT) registerRenderers();
+    if(!Platform.isForge() && Platform.getEnv() == EnvType.CLIENT) registerRenderers();
   }
 
   public static void registerRenderers() {

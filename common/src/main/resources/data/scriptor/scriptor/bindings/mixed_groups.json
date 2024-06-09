@@ -4,8 +4,8 @@
     {
       "word": "other:and",
       "parameters": {
-        "min_tokens": 2,
-        "max_tokens": 2
+        "minTokens": 2,
+        "maxTokens": 2
       }
     }
   ]

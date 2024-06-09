@@ -5,21 +5,20 @@ import com.google.common.collect.HashBiMap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.ssblur.scriptor.ScriptorMod;
-import com.ssblur.scriptor.api.word.Action;
-import com.ssblur.scriptor.api.word.Descriptor;
-import com.ssblur.scriptor.api.word.Subject;
-import com.ssblur.scriptor.api.word.Word;
 import com.ssblur.scriptor.registry.TokenGeneratorRegistry;
 import com.ssblur.scriptor.registry.words.WordRegistry;
 import com.ssblur.scriptor.word.PartialSpell;
 import com.ssblur.scriptor.word.Spell;
+import com.ssblur.scriptor.word.Word;
+import com.ssblur.scriptor.word.action.Action;
+import com.ssblur.scriptor.word.descriptor.Descriptor;
+import com.ssblur.scriptor.word.subject.Subject;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import com.ssblur.scriptor.ScriptorMod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -90,7 +89,7 @@ public class DictionarySavedData extends SavedData {
         continue;
 
       do {
-        token = registry.generateWord("action:" + word);
+        token = registry.generateWord(word);
       } while (containsWord(token));
 
       words.put("action:" + word, token);
@@ -101,7 +100,7 @@ public class DictionarySavedData extends SavedData {
         continue;
 
       do {
-        token = registry.generateWord("descriptor:" + word);
+        token = registry.generateWord(word);
       } while (containsWord(token));
 
       words.put("descriptor:" + word, token);
@@ -111,18 +110,18 @@ public class DictionarySavedData extends SavedData {
         continue;
 
       do {
-        token = registry.generateWord("subject:" + word);
+        token = registry.generateWord(word);
       } while (containsWord(token));
 
       words.put("subject:" + word, token);
+
     }
   }
 
   public DictionarySavedData() {
-    WORD[] basicStructure = new WORD[]{WORD.SUBJECT, WORD.ACTION, WORD.DESCRIPTOR};
+    WORD[] basicStructure = new WORD[]{WORD.ACTION, WORD.DESCRIPTOR, WORD.SUBJECT};
     List<WORD> structure = Arrays.asList(basicStructure);
-    if(!ScriptorMod.COMMUNITY_MODE)
-      Collections.shuffle(structure);
+    Collections.shuffle(structure);
 
     spellStructure = new ArrayList<>();
     spellStructure.addAll(structure);
@@ -206,11 +205,9 @@ public class DictionarySavedData extends SavedData {
       Action action = null;
       List<Descriptor> descriptors = new ArrayList<>();
 
-      String parsed;
       while (tokenPosition < tokens.length) {
         if(position % spellStructure.size() == 0 && position > 0) {
-          parsed = parseWord(tokens[tokenPosition]);
-          if(parsed != null && parsed.equals("other:and")) {
+          if(parseWord(tokens[tokenPosition]).equals("other:and")) {
             tokenPosition++;
             spells.add(new PartialSpell(action, descriptors.toArray(Descriptor[]::new)));
           } else {
@@ -360,27 +357,24 @@ public class DictionarySavedData extends SavedData {
   public static DictionarySavedData computeIfAbsent(ServerLevel level) {
     ServerLevel server = level.getServer().getLevel(Level.OVERWORLD);
     Objects.requireNonNull(server);
-    return server.getDataStorage().computeIfAbsent(
-      new Factory<>(DictionarySavedData::new, DictionarySavedData::load, DataFixTypes.SAVED_DATA_MAP_DATA),
-      ScriptorMod.COMMUNITY_MODE ? "scriptor_community_dictionary" : "scriptor_dictionary"
-    );
+    return server.getDataStorage().computeIfAbsent(DictionarySavedData::load, DictionarySavedData::new, "scriptor_dictionary");
   }
 
   @Override
   public String toString() {
-    if(ScriptorMod.COMMUNITY_MODE)
-      return "DictionarySavedData[COMMUNITY_MODE=true]";
-
     var builder = new StringBuilder();
 
-    builder.append("Structure: ");
+    builder.append("\n\nStructure:\n");
     for(var w: spellStructure)
-      builder.append(w)
-        .append(" ");
+      builder.append(w).append(" ");
+    builder.append("\n\n");
 
-    builder.append("\nContains ")
-      .append(words.size())
-      .append(" Words.");
+    builder.append("Words:\n");
+    for(var k: words.keySet()) {
+      builder.append('"').append(k).append('"');
+      builder.append(" : ");
+      builder.append(words.get(k)).append("\n");
+    }
 
     return builder.toString();
   }

@@ -4,6 +4,7 @@ import com.ssblur.scriptor.helpers.SpellbookAccess;
 import com.ssblur.scriptor.item.ScriptorItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.screens.inventory.LecternScreen;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Environment(EnvType.CLIENT)
 @Mixin(LecternScreen.class)
 public class LecternScreenAccessorPatch {
-  @Inject(method = "bookChanged", at = @At("TAIL"))
+  @Inject(method = "bookChanged", at = @At("TAIL"), cancellable = true)
   void bookChanged(CallbackInfo info) {
     var self = (LecternScreen) (Object) this;
     ItemStack itemStack = self.getMenu().getBook();

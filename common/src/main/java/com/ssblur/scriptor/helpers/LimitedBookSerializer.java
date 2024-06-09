@@ -6,18 +6,16 @@ import com.ssblur.scriptor.ScriptorMod;
 import com.ssblur.scriptor.item.ScriptorItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class LimitedBookSerializer {
+  @SuppressWarnings("UnstableApiUsage")
   static Type PAGE_TYPE = new TypeToken<Page>() {}.getType();
   static class Page {
     String text;
@@ -35,40 +33,17 @@ public class LimitedBookSerializer {
     Gson gson = new Gson();
     StringBuilder builder = new StringBuilder();
     for(Tag tag: text) {
-      try {
-        Page page = gson.fromJson(tag.getAsString(), PAGE_TYPE);
-        builder.append(page.text.strip());
-        builder.append(" ");
-        continue;
-      } catch(Exception ignored) {}
-
-      try {
-        var string = gson.fromJson(tag.getAsString(), String.class);
-        builder.append(string.strip());
-        builder.append(" ");
-      } catch(Exception e) {
-        builder.append(tag.toString());
-        builder.append(" ");
-      }
+      Page page = gson.fromJson(tag.getAsString(), PAGE_TYPE);
+      builder.append(page.text.strip());
+      builder.append(" ");
     }
     return builder.toString().stripTrailing();
   }
 
   public static String decodeText(String text) {
     Gson gson = new Gson();
-    try {
-      Page page = gson.fromJson(text, PAGE_TYPE);
-      return page.text.strip();
-    } catch(Exception ignored) {}
-
-    try {
-      var string = gson.fromJson(text, String.class);
-      return string.strip();
-    } catch(Exception e) {
-      return "Error parsing text: \""
-        + text
-        + "\".";
-    }
+    Page page = gson.fromJson(text, PAGE_TYPE);
+    return page.text.strip();
   }
 
   /**
@@ -110,23 +85,13 @@ public class LimitedBookSerializer {
     return tag;
   }
 
-  public static ItemStack createSpellbook(String author, String title, String text, @Nullable String item) {
+  public static ItemStack createSpellbook(String author, String title, String text) {
     CompoundTag tag = new CompoundTag();
     tag.putString("author", author);
     tag.putString("title", title);
     tag.put("pages", encodeText(text));
-    if(ScriptorMod.COMMUNITY_MODE) {
-      var scriptor = new CompoundTag();
-      scriptor.putBoolean("community", true);
-      tag.put("scriptor", scriptor);
-    }
 
-
-    ItemStack itemStack;
-    if(item != null)
-      itemStack = new ItemStack(Objects.requireNonNull(ScriptorItems.ITEMS.getRegistrar().get(new ResourceLocation(item))));
-    else
-      itemStack = new ItemStack(ScriptorItems.SPELLBOOK.get());
+    ItemStack itemStack = new ItemStack(ScriptorItems.SPELLBOOK.get());
     itemStack.setCount(1);
     itemStack.setTag(tag);
     return itemStack;

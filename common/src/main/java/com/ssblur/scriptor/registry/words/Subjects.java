@@ -1,6 +1,5 @@
 package com.ssblur.scriptor.registry.words;
 
-import com.ssblur.scriptor.api.word.Subject;
 import com.ssblur.scriptor.word.subject.*;
 
 public class Subjects {

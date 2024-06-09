@@ -1,7 +1,9 @@
 package com.ssblur.scriptor.registry;
 
 import com.google.gson.JsonObject;
-import com.ssblur.scriptor.helpers.generators.*;
+import com.ssblur.scriptor.helpers.generators.MixedGroupGenerator;
+import com.ssblur.scriptor.helpers.generators.StaticTokenGenerator;
+import com.ssblur.scriptor.helpers.generators.TokenGenerator;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -14,10 +16,6 @@ public class TokenGeneratorRegistry {
     INSTANCE.registerGeneratorGenerator("mixed_groups", MixedGroupGenerator::new);
   public static final TokenGenerator.TokenGeneratorGenerator STATIC_TOKEN =
     INSTANCE.registerGeneratorGenerator("static_token", StaticTokenGenerator::new);
-  public static final TokenGenerator.TokenGeneratorGenerator COMMUNITY =
-    INSTANCE.registerGeneratorGenerator("community", CommunityModeGenerator::new);
-  public static final TokenGenerator.TokenGeneratorGenerator DEBUG =
-    INSTANCE.registerGeneratorGenerator("debug", DebugGenerator::new);
 
   HashMap<ResourceLocation, TokenGenerator> generators = new HashMap<>();
   HashMap<String, ResourceLocation> generatorBindings = new HashMap<>();

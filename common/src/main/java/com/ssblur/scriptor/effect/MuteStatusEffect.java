@@ -3,6 +3,7 @@ package com.ssblur.scriptor.effect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.NotNull;
 
 public class MuteStatusEffect extends MobEffect {
   public MuteStatusEffect() {

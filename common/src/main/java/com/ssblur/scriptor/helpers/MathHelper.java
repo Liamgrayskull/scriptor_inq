@@ -1,6 +1,8 @@
 package com.ssblur.scriptor.helpers;
 
 import net.minecraft.world.phys.Vec2;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import oshi.util.tuples.Pair;
 
 public class MathHelper {
   /**
@@ -8,6 +10,7 @@ public class MathHelper {
    * @param position The step in the spiral
    * @return A pair of integers which represent the offset from origin of this step in the spiral.
    */
+  @NonNull
   public static Vec2 spiral(int position) {
     assert position > 0;
     int sqrt = (int) Math.ceil(Math.sqrt(position));

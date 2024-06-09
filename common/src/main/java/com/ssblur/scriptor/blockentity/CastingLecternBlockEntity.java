@@ -1,9 +1,8 @@
 package com.ssblur.scriptor.blockentity;
 
 import com.ssblur.scriptor.block.CastingLecternBlock;
+import com.ssblur.scriptor.events.messages.ParticleNetwork;
 import com.ssblur.scriptor.data.DictionarySavedData;
-import com.ssblur.scriptor.events.network.ParticleNetwork;
-import com.ssblur.scriptor.gamerules.ScriptorGameRules;
 import com.ssblur.scriptor.helpers.LimitedBookSerializer;
 import com.ssblur.scriptor.helpers.targetable.LecternTargetable;
 import com.ssblur.scriptor.item.casters.CasterCrystal;
@@ -99,18 +98,18 @@ public class CastingLecternBlockEntity extends BlockEntity {
         var text = compound.getList("pages", Tag.TAG_STRING);
         Spell spell = DictionarySavedData.computeIfAbsent(server).parse(LimitedBookSerializer.decodeText(text));
         if(spell != null) {
-          if(spell.cost() > level.getGameRules().getInt(ScriptorGameRules.CASTING_LECTERN_MAX_COST)) {
+          if(spell.cost() > 20) {
             ParticleNetwork.fizzle(level, getBlockPos());
             level.playSound(null, this.getBlockPos(), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
-            cooldown += (int) Math.round(200.0D * ( (double) level.getGameRules().getInt(ScriptorGameRules.CASTING_LECTERN_COOLDOWN_MULTIPLIER) / (double) 100));
+            cooldown += 200;
             return;
           }
           var state = level.getBlockState(getBlockPos());
           var direction = state.getValue(CastingLecternBlock.FACING).getOpposite();
           var blockPos = this.getBlockPos();
-          float offsetX = direction.getAxis() == Direction.Axis.X ? Math.signum(blockPos.getX()) : 0.5f;
-          float offsetZ = direction.getAxis() == Direction.Axis.Z ? Math.signum(blockPos.getZ()) : 0.5f;
-          var pos = new Vector3f(blockPos.getX() + offsetX, blockPos.getY() + 0.49f, blockPos.getZ() + offsetZ);
+          float offsetX = direction.getAxis() == Direction.Axis.X ? Math.signum(blockPos.getX()) : 0;
+          float offsetZ = direction.getAxis() == Direction.Axis.Z ? Math.signum(blockPos.getZ()) : 0;
+          var pos = new Vector3f(blockPos.getX() + offsetX, blockPos.getY() + 0.5f, blockPos.getZ() + offsetZ);
           var target = new LecternTargetable(this.getLevel(), pos).setFacing(direction);
           if(getFocus().getItem() instanceof CasterCrystal crystal) {
             var foci = crystal.getTargetables(getFocus(), level);
@@ -123,7 +122,7 @@ public class CastingLecternBlockEntity extends BlockEntity {
             }
           }
           spell.cast(target);
-          cooldown += (int) Math.round(spell.cost() * 10.0D * ( (double) level.getGameRules().getInt(ScriptorGameRules.CASTING_LECTERN_COOLDOWN_MULTIPLIER) / (double) 100));
+          cooldown += (int) Math.round(spell.cost() * 10);
         }
       }
     }

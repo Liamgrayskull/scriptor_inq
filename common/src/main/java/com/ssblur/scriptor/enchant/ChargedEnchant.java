@@ -1,5 +1,6 @@
 package com.ssblur.scriptor.enchant;
 
+import com.ssblur.scriptor.ScriptorMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.Entity;
@@ -9,6 +10,10 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
+import net.minecraft.world.item.enchantment.Enchantments;
+
+import java.io.IOException;
+import java.util.List;
 
 public class ChargedEnchant extends Enchantment {
   static EquipmentSlot[] slots = new EquipmentSlot[] {

@@ -1,10 +1,10 @@
 package com.ssblur.scriptor.helpers.generators;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.ssblur.scriptor.events.reloadlisteners.ReagentReloadListener;
+import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -14,7 +14,7 @@ public class MixedGroupGenerator extends TokenGenerator {
   public record TokenGroup(String[] tokens, int weight) {}
   public record MixedGroupParameters(TokenGroup[] groups, int maxConsecutiveGroups, int minTokens, int maxTokens) {}
   static Type PARAMETERS_TYPE = new TypeToken<MixedGroupParameters>() {}.getType();
-  static Gson GSON = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+  static Gson GSON = new Gson();
   static Random RANDOM = new Random();
 
 
@@ -27,23 +27,17 @@ public class MixedGroupGenerator extends TokenGenerator {
       totalWeight += group.weight();
   }
 
-  protected MixedGroupGenerator() {}
-
   public boolean canBeDefault() { return true; }
 
   @Override
   public String generateToken(String key, @Nullable JsonObject parameters) {
     int maxTokens = this.parameters.maxTokens;
     int minTokens = this.parameters.minTokens;
-    int maxConsecutiveGroups = this.parameters.maxConsecutiveGroups;
-
-    if(this.parameters.groups.length <= 1) maxConsecutiveGroups = 0;
-
     if(parameters != null) {
-      if (parameters.has("max_tokens"))
-        maxTokens = parameters.get("max_tokens").getAsInt();
-      if (parameters.has("min_tokens"))
-        minTokens = parameters.get("min_tokens").getAsInt();
+      if (parameters.has("maxTokens"))
+        maxTokens = parameters.get("maxTokens").getAsInt();
+      if (parameters.has("minTokens"))
+        minTokens = parameters.get("minTokens").getAsInt();
     }
 
     int tokens = RANDOM.nextInt(minTokens, maxTokens + 1);
@@ -52,7 +46,7 @@ public class MixedGroupGenerator extends TokenGenerator {
     TokenGroup lastGroup = null;
     int consecutiveGroups = 0;
 
-    for(int i = 0; i < tokens; i++) {
+    for(int i = minTokens; i <= tokens; i++) {
       TokenGroup tokenGroup = null;
       do {
         int random = RANDOM.nextInt(totalWeight);
@@ -64,16 +58,7 @@ public class MixedGroupGenerator extends TokenGenerator {
             random -= group.weight;
           }
         }
-      } while(
-        tokenGroup == null
-          || (
-          maxConsecutiveGroups > 0
-            && (
-              lastGroup == tokenGroup
-                && consecutiveGroups >= maxConsecutiveGroups
-          )
-        )
-      );
+      } while(tokenGroup == null || (lastGroup == tokenGroup && consecutiveGroups >= this.parameters.maxConsecutiveGroups));
 
       if(lastGroup != tokenGroup) {
         consecutiveGroups = 0;
@@ -82,6 +67,7 @@ public class MixedGroupGenerator extends TokenGenerator {
       consecutiveGroups++;
 
       var groupTokens = tokenGroup.tokens;
+
       builder.append(groupTokens[RANDOM.nextInt(groupTokens.length)]);
     }
     return builder.toString();

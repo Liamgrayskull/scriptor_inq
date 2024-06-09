@@ -1,8 +1,10 @@
 package com.ssblur.scriptor.blockentity;
 
+import com.google.common.collect.ImmutableList;
+import com.ssblur.scriptor.color.interfaces.Colorable;
 import com.ssblur.scriptor.data.DictionarySavedData;
-import com.ssblur.scriptor.events.network.ParticleNetwork;
-import com.ssblur.scriptor.gamerules.ScriptorGameRules;
+import com.ssblur.scriptor.events.messages.ParticleNetwork;
+import com.ssblur.scriptor.helpers.LimitedBookSerializer;
 import com.ssblur.scriptor.helpers.targetable.Targetable;
 import com.ssblur.scriptor.word.Spell;
 import net.minecraft.core.BlockPos;
@@ -32,30 +34,41 @@ public class ChalkBlockEntity extends BlockEntity {
   }
 
   public void cast() {
-    this.cast(new ArrayList<>(), "", true);
+    this.cast(new ArrayList<>(), "");
   }
 
-  public void cast(List<BlockPos> visited, String words, boolean primary) {
+  public void cast(List<BlockPos> visited, String words) {
     boolean continued = false;
     assert level != null;
-    visited.add(getBlockPos());
     if(!visited.contains(getBlockPos().north()) && level.getBlockEntity(getBlockPos().north()) instanceof ChalkBlockEntity entity) {
-      entity.cast(visited, words + " " + word, primary);
+      var list = new ArrayList<>(visited);
+      list.add(getBlockPos());
+
+      entity.cast(list, words + " " + word);
       continued = true;
     }
 
     if(!visited.contains(getBlockPos().south()) && level.getBlockEntity(getBlockPos().south()) instanceof ChalkBlockEntity entity) {
-      entity.cast(visited, words + " " + word, !continued && primary);
+      var list = new ArrayList<>(visited);
+      list.add(getBlockPos());
+
+      entity.cast(list, words + " " + word);
       continued = true;
     }
 
     if(!visited.contains(getBlockPos().east()) && level.getBlockEntity(getBlockPos().east()) instanceof ChalkBlockEntity entity) {
-      entity.cast(visited, words + " " + word, !continued && primary);
+      var list = new ArrayList<>(visited);
+      list.add(getBlockPos());
+
+      entity.cast(list, words + " " + word);
       continued = true;
     }
 
     if(!visited.contains(getBlockPos().west()) && level.getBlockEntity(getBlockPos().west()) instanceof ChalkBlockEntity entity) {
-      entity.cast(visited, words + " " + word, !continued && primary);
+      var list = new ArrayList<>(visited);
+      list.add(getBlockPos());
+
+      entity.cast(list, words + " " + word);
       continued = true;
     }
 
@@ -65,16 +78,16 @@ public class ChalkBlockEntity extends BlockEntity {
     if(level instanceof ServerLevel server) {
       words = words + " " + word;
       Spell spell = DictionarySavedData.computeIfAbsent(server).parse(words.trim());
-      if(spell != null && spell.cost() < server.getGameRules().getInt(ScriptorGameRules.CHALK_MAX_COST)) {
+      if(spell != null && spell.cost() < 200) {
         var target = new Targetable(level, getBlockPos());
         target.setFacing(facing);
         for(var block: visited)
           level.setBlockAndUpdate(block, Blocks.AIR.defaultBlockState());
         level.setBlockAndUpdate(getBlockPos(), Blocks.AIR.defaultBlockState());
         spell.cast(target);
-      } else if(primary) {
-        ParticleNetwork.fizzle(level, visited.get(0));
-        level.playSound(null, visited.get(0), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
+      } else {
+        ParticleNetwork.fizzle(level, getBlockPos());
+        level.playSound(null, this.getBlockPos(), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
       }
     }
   }

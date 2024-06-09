@@ -14,7 +14,7 @@ modrinth {
     versionNumber = version
     versionName = version + "-FABRIC"
     changelog = (System.getenv("CHANGELOG") ?: "Could not load changelog").replace("\n", "\n\n")
-    versionType = "release"
+    versionType = "beta"
     uploadFile = tasks.named("signedJar").get().outputs.files.singleFile
     gameVersions = [rootProject.minecraft_version]
     loaders = ["fabric"]
@@ -23,10 +23,8 @@ modrinth {
         required.project "fabric-api"
         optional.project "patchouli"
     }
-    syncBodyFrom = rootProject.file("README.md").text
 }
 tasks.modrinth.dependsOn tasks.named("signedJar")
-
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
@@ -64,13 +62,18 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
+    classifier "dev-shadow"
 }
 
 remapJar {
     injectAccessWidener = true
-    input.set shadowJar.archiveFile
+    inputFile.set shadowJar.archiveFile
     dependsOn shadowJar
+    classifier null
+}
+
+jar {
+    classifier "dev"
 }
 
 sourcesJar {

@@ -14,7 +14,7 @@ modrinth {
     versionNumber = version
     versionName = version + "-FORGE"
     changelog = (System.getenv("CHANGELOG") ?: "Could not load changelog").replace("\n", "\n\n")
-    versionType = "release"
+    versionType = "beta"
     uploadFile = tasks.named("signedJar").get().outputs.files.singleFile
     gameVersions = [rootProject.minecraft_version]
     loaders = ["forge"]
@@ -22,7 +22,6 @@ modrinth {
         required.project "architectury-api"
         optional.project "patchouli"
     }
-    syncBodyFrom = rootProject.file("README.md").text
 }
 tasks.modrinth.dependsOn tasks.named("signedJar")
 
@@ -40,6 +39,7 @@ configurations {
     common
     shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
 }
 
@@ -51,7 +51,7 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-//    modImplementation "vazkii.patchouli:Patchouli:${rootProject.patchouli_version}-FORGE"
+    modImplementation "vazkii.patchouli:Patchouli:${rootProject.patchouli_version}-FORGE"
 }
 
 processResources {
@@ -67,12 +67,17 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
+    classifier "dev-shadow"
 }
 
 remapJar {
     inputFile.set shadowJar.archiveFile
     dependsOn shadowJar
+    classifier null
+}
+
+jar {
+    classifier "dev"
 }
 
 sourcesJar {
@@ -99,10 +104,4 @@ publishing {
     repositories {
         // Add repositories to publish to here.
     }
-}
-
-sourceSets.each {
-  def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
-  it.output.resourcesDir = dir
-  it.java.destinationDirectory = dir
 }

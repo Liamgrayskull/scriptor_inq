@@ -1,9 +1,8 @@
 package com.ssblur.scriptor.color;
 
-import com.ssblur.scriptor.api.word.Descriptor;
+import com.ssblur.scriptor.word.descriptor.Descriptor;
 import com.ssblur.scriptor.word.descriptor.color.ColorDescriptor;
 import net.minecraft.world.item.DyeColor;
-
 import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;

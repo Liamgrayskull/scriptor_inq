@@ -1,11 +1,12 @@
 package com.ssblur.scriptor.word.action;
 
-import com.ssblur.scriptor.api.word.Action;
-import com.ssblur.scriptor.api.word.Descriptor;
+import com.ssblur.scriptor.enchant.ChargedEnchant;
 import com.ssblur.scriptor.helpers.ItemTargetableHelper;
 import com.ssblur.scriptor.helpers.targetable.EntityTargetable;
+import com.ssblur.scriptor.helpers.targetable.InventoryTargetable;
 import com.ssblur.scriptor.helpers.targetable.ItemTargetable;
 import com.ssblur.scriptor.helpers.targetable.Targetable;
+import com.ssblur.scriptor.word.descriptor.Descriptor;
 import com.ssblur.scriptor.word.descriptor.duration.DurationDescriptor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
@@ -13,6 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -33,8 +35,8 @@ public class InflameAction extends Action {
       var container = new SimpleContainer(1);
       container.addItem(itemTargetable.getTargetItem());
       var recipe = check.getRecipeFor(container, itemTargetable.getLevel());
-      if(recipe.isPresent() && recipe.get().value().getIngredients().size() > 0 && recipe.get().value().getIngredients().get(0).getItems().length > 0) {
-        int count = recipe.get().value().getIngredients().get(0).getItems()[0].getCount();
+      if(recipe.isPresent() && recipe.get().getIngredients().size() > 0 && recipe.get().getIngredients().get(0).getItems().length > 0) {
+        int count = recipe.get().getIngredients().get(0).getItems()[0].getCount();
         itemTargetable.getTargetItem().shrink(count);
 
         var pos = itemTargetable.getTargetPos();
@@ -43,7 +45,7 @@ public class InflameAction extends Action {
           pos.x(),
           pos.y() + 1,
           pos.z(),
-          recipe.get().value().getResultItem(targetable.getLevel().registryAccess())
+          recipe.get().getResultItem(targetable.getLevel().registryAccess())
         );
         caster.getLevel().addFreshEntity(entity);
       }
@@ -56,10 +58,10 @@ public class InflameAction extends Action {
       var container = new SimpleContainer(1);
       container.addItem(itemTarget);
       var recipe = check.getRecipeFor(container, targetable.getLevel());
-      if(recipe.isPresent() && recipe.get().value().getIngredients().size() > 0 && recipe.get().value().getIngredients().get(0).getItems().length > 0) {
-        int count = recipe.get().value().getIngredients().get(0).getItems()[0].getCount();
+      if(recipe.isPresent() && recipe.get().getIngredients().size() > 0 && recipe.get().getIngredients().get(0).getItems().length > 0) {
+        int count = recipe.get().getIngredients().get(0).getItems()[0].getCount();
         itemTarget.shrink(count);
-        ItemTargetableHelper.depositItemStack(targetable, recipe.get().value().getResultItem(targetable.getLevel().registryAccess()));
+        ItemTargetableHelper.depositItemStack(targetable, recipe.get().getResultItem(targetable.getLevel().registryAccess()));
         return;
       }
     }

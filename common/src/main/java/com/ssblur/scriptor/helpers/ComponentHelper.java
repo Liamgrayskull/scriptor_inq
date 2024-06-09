@@ -1,12 +1,16 @@
 package com.ssblur.scriptor.helpers;
 
-import com.ssblur.scriptor.ScriptorMod;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.StringDecomposer;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,17 +65,5 @@ public class ComponentHelper {
     list.add(line.toString());
 
     return list.stream().map(Component::literal).toList();
-  }
-
-  public static void addCommunityDisclaimer(List<Component> list, ItemStack itemStack) {
-    var scriptor = itemStack.getTagElement("scriptor");
-
-    if(scriptor != null && scriptor.getBoolean("community") && !ScriptorMod.COMMUNITY_MODE) {
-      list.add(Component.translatable("lore.scriptor.not_community_2").withStyle(ChatFormatting.RED));
-      list.add(Component.translatable("lore.scriptor.not_community_3").withStyle(ChatFormatting.RED));
-    } else if((scriptor == null || !scriptor.getBoolean("community")) && ScriptorMod.COMMUNITY_MODE) {
-      list.add(Component.translatable("lore.scriptor.not_community_1").withStyle(ChatFormatting.RED));
-      list.add(Component.translatable("lore.scriptor.not_community_3").withStyle(ChatFormatting.RED));
-    }
   }
 }

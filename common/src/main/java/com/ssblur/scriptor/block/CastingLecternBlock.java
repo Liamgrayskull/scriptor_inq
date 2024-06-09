@@ -14,10 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -71,15 +68,14 @@ public class CastingLecternBlock extends Block implements EntityBlock {
   }
 
   @Override
-  public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-    var result = super.playerWillDestroy(level, blockPos, blockState, player);
+  public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+    super.playerWillDestroy(level, blockPos, blockState, player);
     if(level.getBlockEntity(blockPos) instanceof CastingLecternBlockEntity lectern) {
       for(var item: lectern.getItems()) {
         var entity = new ItemEntity(level, blockPos.getX() + 0.5f, blockPos.getY() + 0.5f, blockPos.getZ() + 0.5f, item);
         level.addFreshEntity(entity);
       }
     }
-    return result;
   }
 
   public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {

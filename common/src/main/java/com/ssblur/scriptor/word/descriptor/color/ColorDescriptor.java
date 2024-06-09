@@ -1,6 +1,6 @@
 package com.ssblur.scriptor.word.descriptor.color;
 
-import com.ssblur.scriptor.api.word.Descriptor;
+import com.ssblur.scriptor.word.descriptor.Descriptor;
 
 public class ColorDescriptor extends Descriptor {
   int color;

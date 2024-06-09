@@ -3,21 +3,27 @@ package com.ssblur.scriptor.item;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.ssblur.scriptor.ScriptorMod;
-import com.ssblur.scriptor.events.network.EnchantNetwork;
+import com.ssblur.scriptor.advancement.ScriptorAdvancements;
 import com.ssblur.scriptor.helpers.ComponentHelper;
+import com.ssblur.scriptor.helpers.ConfigHelper;
+import com.ssblur.scriptor.data.DictionarySavedData;
 import com.ssblur.scriptor.helpers.LimitedBookSerializer;
 import com.ssblur.scriptor.helpers.SpellbookHelper;
+import com.ssblur.scriptor.helpers.targetable.SpellbookTargetable;
 import com.ssblur.scriptor.item.interfaces.ItemWithCustomRenderer;
+import com.ssblur.scriptor.events.messages.EnchantNetwork;
+import com.ssblur.scriptor.word.Spell;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
@@ -27,9 +33,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.WrittenBookItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +52,7 @@ public class Spellbook extends WrittenBookItem implements ItemWithCustomRenderer
     if (tag != null) {
       String string = tag.getString("title");
       if (!StringUtil.isNullOrEmpty(string)) {
-        return Component.translatable(string);
+        return Component.literal(string);
       }
     }
     return super.getName(itemStack);
@@ -101,8 +105,6 @@ public class Spellbook extends WrittenBookItem implements ItemWithCustomRenderer
         else
           list.add(Component.translatable("extra.scriptor.tome_identified"));
       }
-
-      ComponentHelper.addCommunityDisclaimer(list, itemStack);
     }
   }
 
@@ -202,12 +204,8 @@ public class Spellbook extends WrittenBookItem implements ItemWithCustomRenderer
       var pages = tag.getList("pages", Tag.TAG_STRING);
       List<FormattedCharSequence> sequence = new ArrayList<>();
       if (page >= pages.size()) {
-        if (tag.contains("title")) {
-          if(I18n.exists(tag.getString("title")))
-            sequence.addAll(font.split(FormattedText.of(I18n.get(tag.getString("title"))), 80));
-          else
-            sequence.addAll(font.split(FormattedText.of(tag.getString("title")), 80));
-        }
+        if (tag.contains("title"))
+          sequence.addAll(font.split(FormattedText.of(tag.getString("title")), 80));
         if (tag.contains("author"))
           sequence.addAll(font.split(FormattedText.of("By " + tag.getString("author")), 80));
       } else
